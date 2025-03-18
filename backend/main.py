@@ -7,8 +7,7 @@ import io
 import csv
 import json
 import chardet
-from typing import List, Optional
-import re
+from typing import List
 from pydub import AudioSegment
 
 app = FastAPI(title="Multilingual TTS API")
@@ -16,7 +15,10 @@ app = FastAPI(title="Multilingual TTS API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://your-vercel-app.vercel.app"  # Add your Vercel domain when you have it
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,21 +49,6 @@ class TextPair(BaseModel):
 class BulkTTSRequest(BaseModel):
     pairs: List[TextPair]
 
-class BulkTextRequest(BaseModel):
-    text: str
-
-def detect_language(text: str) -> str:
-    # Simple language detection based on character sets
-    cyrillic_pattern = re.compile(r'[а-яА-ЯёЁіІїЇєЄ]')
-    german_pattern = re.compile(r'[äöüßÄÖÜ]')
-    
-    if cyrillic_pattern.search(text):
-        return "uk"  # Ukrainian for Cyrillic
-    elif german_pattern.search(text):
-        return "de"  # German for specific German characters
-    else:
-        return "en"  # Default to English for Latin characters
-
 def parse_csv_content(content: str) -> List[dict]:
     # Detect delimiter
     first_line = content.split('\n')[0]
@@ -80,13 +67,9 @@ def parse_csv_content(content: str) -> List[dict]:
         if len(row) >= 2:
             text1, text2 = row[0].strip(), row[1].strip()
             if text1 and text2:
-                lang1 = detect_language(text1)
-                lang2 = detect_language(text2)
                 pairs.append({
                     "text1": text1,
-                    "text2": text2,
-                    "language1": lang1,
-                    "language2": lang2
+                    "text2": text2
                 })
     return pairs
 
@@ -109,8 +92,9 @@ async def upload_file(file: UploadFile = File(...)):
     return {"pairs": pairs}
 
 @app.post("/api/parse-bulk-text")
-async def parse_bulk_text(request: BulkTextRequest):
-    lines = request.text.strip().split('\n')
+async def parse_bulk_text(request: dict):
+    text = request.get('text', '')
+    lines = text.strip().split('\n')
     pairs = []
     
     for i in range(0, len(lines), 2):
@@ -118,13 +102,9 @@ async def parse_bulk_text(request: BulkTextRequest):
             text1 = lines[i].strip()
             text2 = lines[i + 1].strip()
             if text1 and text2:
-                lang1 = detect_language(text1)
-                lang2 = detect_language(text2)
                 pairs.append({
                     "text1": text1,
-                    "text2": text2,
-                    "language1": lang1,
-                    "language2": lang2
+                    "text2": text2
                 })
     
     return {"pairs": pairs}

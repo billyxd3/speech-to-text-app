@@ -16,6 +16,61 @@ A web application that converts text to speech using native speaker voices for m
 - Google Cloud account with Text-to-Speech API enabled
 - Google Cloud credentials (JSON key file)
 
+## Deployment Guide
+
+### Frontend Deployment (Vercel)
+
+1. Push your code to GitHub
+2. Sign up for [Vercel](https://vercel.com)
+3. Import your GitHub repository
+4. Set environment variables in Vercel:
+   - `REACT_APP_API_URL`: Your Render backend URL
+
+### Backend Deployment (Render)
+
+1. Sign up for [Render](https://render.com)
+2. Create a new Web Service
+3. Connect your GitHub repository
+4. Configure the service:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5. Add environment variables if needed
+
+### Local Development
+
+1. Clone the repository
+2. Install dependencies:
+
+   ```bash
+   # Backend
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+
+   # Frontend
+   cd frontend
+   npm install
+   ```
+
+3. Start the development servers:
+
+   ```bash
+   # Backend
+   cd backend
+   uvicorn main:app --reload
+
+   # Frontend
+   cd frontend
+   npm start
+   ```
+
+### Environment Variables
+
+#### Frontend (.env.development)
+
+REACT_APP_API_URL=http://localhost:8000
+
 ## Setup
 
 ### Backend Setup
