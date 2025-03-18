@@ -9,16 +9,27 @@ import json
 import chardet
 from typing import List
 from pydub import AudioSegment
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="Multilingual TTS API")
 
+# Get environment variables
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+
 # Configure CORS
+allowed_origins = [
+    "http://localhost:3000",  # Always allow localhost for development
+    FRONTEND_URL,  # Production frontend URL
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://your-vercel-app.vercel.app"  # Add your Vercel domain when you have it
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
